@@ -6,8 +6,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.physics.box2d.CircleShape;
+
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -36,6 +39,7 @@ public class CaptainCoin extends ApplicationAdapter {
 	Texture coin;
 	int coinCount;
 	Random random;
+
 
 	//bomb
 	ArrayList<Integer> bombXs = new ArrayList<>();
@@ -85,10 +89,11 @@ public class CaptainCoin extends ApplicationAdapter {
 		batch.draw(background,0,0,Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
 		if (gameState == 1){
+			//Game is Active
 
 			//bomb
 			if( bombCount < 200){
-				bombCount += score / 2 ;
+				bombCount += score / 1.5;
 			} else {
 				bombCount = 0;
 				makeBomb();
@@ -96,8 +101,10 @@ public class CaptainCoin extends ApplicationAdapter {
 			bombShape.clear();
 			for (int i =0; i < bombXs.size(); i++){
 				batch.draw(bomb, bombXs.get(i), bombYs.get(i));
-				bombXs.set(i, bombXs.get(i) -6 );
-				bombShape.add(new Rectangle(bombXs.get(i), bombYs.get(i), bomb.getWidth(), bomb.getHeight()));
+				bombXs.set(i, bombXs.get(i) -( 6 + (score/4)));
+				bombShape.add(new Rectangle(bombXs.get(i), bombYs.get(i), bomb.getWidth() - 28, bomb.getHeight() -28));
+//				Gdx.app.log("BOMB Width=", String.valueOf(bomb.getWidth()));
+//				Gdx.app.log("BOMB Height=", String.valueOf(bomb.getHeight()));
 			}
 
 			//coin
@@ -110,7 +117,7 @@ public class CaptainCoin extends ApplicationAdapter {
 			coinShape.clear();
 			for (int i =0; i < coinXs.size(); i++){
 				batch.draw(coin, coinXs.get(i), coinYs.get(i));
-				coinXs.set(i, coinXs.get(i) -4 );
+				coinXs.set(i, coinXs.get(i) - ( 4 + (score/2)));
 				coinShape.add(new Rectangle(coinXs.get(i), coinYs.get(i), coin.getWidth(), coin.getHeight()));
 			}
 
@@ -138,20 +145,16 @@ public class CaptainCoin extends ApplicationAdapter {
 				manY = 0;
 			}
 
-
-
 		} else if (gameState == 0) {
-			//start game
+			//start new game
 			startFont = new BitmapFont();
 			startFont.setColor(Color.RED);
 			startFont.getData().setScale(10);
 			startFont.draw(batch,"Tap to Play",(float) (Gdx.graphics.getWidth() / 6), Gdx.graphics.getHeight() / 3);
 
-
 			if (Gdx.input.justTouched()) {
 				score = 0;
 				gameState = 1;
-
 			}
 		} else if ( gameState == 2 ){
 			//gameOver
@@ -169,7 +172,6 @@ public class CaptainCoin extends ApplicationAdapter {
 				score = 0;
 				gameState = 1;
 			}
-
 		}
 
 		if (gameState == 2 ){
@@ -202,7 +204,7 @@ public class CaptainCoin extends ApplicationAdapter {
 		//bomb collision
 		for(int i =0; i < bombShape.size(); i++){
 			if(Intersector.overlaps(manShape, bombShape.get(i))){
-			Gdx.app.log("BOMB", "Ye DED!!");
+//			Gdx.app.log("BOMB", "Ye DED!!");
 			gameState = 2;
 			}
 		}
@@ -210,7 +212,7 @@ public class CaptainCoin extends ApplicationAdapter {
 		scoreFont.draw(batch, String.valueOf(score), 100,200);
 		batch.end();
 	} // end render
-	
+
 	@Override
 	public void dispose () {
 		batch.dispose();
